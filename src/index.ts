@@ -3,14 +3,18 @@ import {getTouchedSourceFilesRequireTests, getTouchedTestFiles} from './fileFilt
 
 export = (app: Application) => {
     app.on('pull_request.opened', async (context) => {
+
         const config = await context.config('tests_checker.yml', {
             comment: 'Could you please add tests to make sure this change works as expected?',
-            fileExtensions: ['.php', '.ts', '.js', '.c', '.cs', '.cpp', '.rb', '.java'],
-            testDir: 'tests',
-            testPattern: '',
+            fileExtensions: ['.ts', '.js', '.rb',],
+            testPattern: '*.test.js',
         });
 
         const issue = context.issue();
+
+        const review = await context.github.pullRequests.get({number: issue.number, repo: issue.repo, owner: issue.owner});
+
+        context.log(`REVIRE= label:${review.data.head.label}, ref: ${review.data.head.ref}, sha: ${review.data.head.sha}`);
 
         context.log('PR=' + 'https://github.com/' + issue.owner + '/' + issue.repo + '/pull/' + issue.number);
 
